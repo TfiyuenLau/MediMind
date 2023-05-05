@@ -33,7 +33,7 @@ public class SwaggerConfiguration {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("AI Diagnosis辅助诊断模块接口文档")
-                .description("本文档用于AI Diagnosis辅助诊断模块API的接口交接...如有疑问请向 tfiyuenlau@foxmail.com 核查")
+                .description("本文档用于MediMind的AI Diagnosis辅助诊断模块API的接口交接...如有疑问请向 tfiyuenlau@foxmail.com 核查")
                 .version("v23-04-13")
                 .build();
     }

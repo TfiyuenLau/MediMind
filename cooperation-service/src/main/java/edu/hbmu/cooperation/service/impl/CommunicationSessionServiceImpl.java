@@ -107,7 +107,7 @@ public class CommunicationSessionServiceImpl extends ServiceImpl<CommunicationSe
      * @return
      */
     @Override
-    public List<CommunicationSession> getSessionByGroupId(Long groupId) {
+    public List<CommunicationSession> getSessionsByGroupId(Long groupId) {
         LambdaQueryWrapper<CommunicationSession> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(CommunicationSession::getChatType, 2).eq(CommunicationSession::getToId, groupId);
 
@@ -160,10 +160,12 @@ public class CommunicationSessionServiceImpl extends ServiceImpl<CommunicationSe
     @Override
     public int updateSessionLastMsg(Long id, String message, String doctorName) {
         CommunicationSession communicationSession = new CommunicationSession();
+        communicationSession.setLastMsg(message);
+        communicationSession.setLastDoctorName(doctorName);
 
         LambdaUpdateWrapper<CommunicationSession> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(CommunicationSession::getId, id)
-                .set(CommunicationSession::getLastMsg, communicationSession.getLastMsg())// 更新最后一条消息
+                .set(CommunicationSession::getLastMsg, message)// 更新最后一条消息
                 .set(CommunicationSession::getLastDoctorName, doctorName)// 更新消息发送者
                 .set(CommunicationSession::getLastTime, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
 
@@ -182,7 +184,7 @@ public class CommunicationSessionServiceImpl extends ServiceImpl<CommunicationSe
     public int updateGroupSessionLastMsg(Long groupId, String message, String doctorName) {
         int count = 0;// 计数修改会话
         // 查询所有需要更新的群会话
-        List<CommunicationSession> communicationSessionList = this.getSessionByGroupId(groupId);
+        List<CommunicationSession> communicationSessionList = this.getSessionsByGroupId(groupId);
         for (CommunicationSession communicationSession : communicationSessionList) {// 批量更新
             LambdaUpdateWrapper<CommunicationSession> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.eq(CommunicationSession::getId, communicationSession.getId())
@@ -212,6 +214,12 @@ public class CommunicationSessionServiceImpl extends ServiceImpl<CommunicationSe
                 .set(CommunicationSession::getUnreadCount, unreadCount);
 
         return communicationSessionMapper.update(communicationSession, updateWrapper);
+    }
+
+    public int updateGroupSessionsUnread() {
+        // TODO：更新群组的未读消息；需要根据具体的群聊会话更新其的单独的未读消息
+
+        return -1;
     }
 
 }

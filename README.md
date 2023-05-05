@@ -10,6 +10,8 @@
 
 总之，MediMind是一个具有创新性的、与上级HIS系统兼容的、拥有知识图谱辅助诊断用药推荐功能的医疗辅助系统。它将为医生提供更高效、更精准、更便捷的医疗服务，为患者提供更好的医疗体验。
 
+![2023计设项目需求](https://img2023.cnblogs.com/blog/3018774/202304/3018774-20230422142250312-563379237.png)
+
 ## 技术选型与开源组件
 * **编程语言**：Java11
 * **项目构建管理工具**：Apache Maven
@@ -29,132 +31,19 @@
 ## 项目结构
 MediMind采用**微服务架构**以达到解耦与提高分布式部署效率与性能的目的。
 
-~~~
-MediMind:
-├─ai-diagnosis  # AI辅助诊断模块
-│  └─src
-│      ├─main
-│      │  ├─java
-│      │  │  └─edu
-│      │  │      └─hbmu
-│      │  │          └─aidiagnosis
-│      │  │              ├─config  # 配置类
-│      │  │              ├─controller  # 前端控制器
-│      │  │              ├─dao  # 数据访问层
-│      │  │              ├─domain  # pojo层
-│      │  │              │  ├─node  # Neo4j节点实体类
-│      │  │              │  ├─relationship  # 关系实体类
-│      │  │              │  └─response  # VO视图对象类
-│      │  │              ├─service  # 服务层
-│      │  │              │  └─impl  # 服务层实现类
-│      │  │              └─util  # 工具类
-│      │  └─resources  # 资源文件
-│      │      └─dict
-│      └─test  # 测试类
-│          └─java
-│              └─edu
-│                  └─hbmu
-│                      └─aidiagnosis
-├─cooperation-service  # 医疗团队通讯协作模块
-│  └─src
-│      ├─main
-│      │  ├─java
-│      │  │  └─edu
-│      │  │      └─hbmu
-│      │  │          └─cooperation
-│      │  │              ├─config
-│      │  │              ├─controller
-│      │  │              ├─dao
-│      │  │              ├─domain
-│      │  │              │  ├─entity
-│      │  │              │  ├─request
-│      │  │              │  └─response
-│      │  │              ├─generator
-│      │  │              ├─service
-│      │  │              │  └─impl
-│      │  │              ├─util
-│      │  │              └─websocket
-│      │  └─resources
-│      │      └─mapper
-│      └─test
-│          └─java
-│              └─edu
-│                  └─hbmu
-│                      └─cooperation
-├─feign-api  # 微服务远程调用模块
-│  ├─.mvn
-│  │  └─wrapper
-│  └─src
-│      ├─main
-│      │  ├─java
-│      │  │  └─edu
-│      │  │      └─hbmu
-│      │  │          └─fegin
-│      │  │              ├─client
-│      │  │              └─domain
-│      │  │                  ├─entity
-│      │  │                  └─response
-│      │  └─resources
-│      └─test
-│          └─java
-│              └─edu
-│                  └─hbmu
-│                      └─fegin
-├─gateway  # 微服务网关模块
-│  ├─.mvn
-│  │  └─wrapper
-│  └─src
-│      ├─main
-│      │  ├─java
-│      │  │  └─edu
-│      │  │      └─hbmu
-│      │  │          └─gateway
-│      │  └─resources
-│      └─test
-│          └─java
-│              └─edu
-│                  └─hbmu
-│                      └─gateway
-└─outpatient-service  # 门诊服务模块
-    ├─.mvn
-    │  └─wrapper
-    └─src
-        ├─main
-        │  ├─java
-        │  │  └─edu
-        │  │      └─hbmu
-        │  │          └─outpatient
-        │  │              ├─config
-        │  │              ├─constants
-        │  │              ├─controller
-        │  │              ├─dao
-        │  │              ├─domain
-        │  │              │  ├─doc
-        │  │              │  ├─entity
-        │  │              │  ├─request
-        │  │              │  └─response
-        │  │              ├─generator
-        │  │              ├─service
-        │  │              │  └─impl
-        │  │              ├─spider
-        │  │              └─util
-        │  └─resources
-        │      ├─dict
-        │      └─mapper
-        └─test
-            └─java
-                └─edu
-                    └─hbmu
-                        └─outpatient
-~~~
+![MediMind模块图](https://img2023.cnblogs.com/blog/3018774/202304/3018774-20230426213501577-1799754737.png)
 
 # 延伸阅读
 以下是您可能会感兴趣的内容：
 
-## demo：
+## 开发文档
+[MediMind项目开发文档——基于知识图谱的AI诊断辅助系统](https://www.cnblogs.com/tfiyuenlau/articles/17343623.html)
 
-## 仓库地址：
+## demo
+[MediMind首页](http://p4jpnb.natappfree.cc/)
 
-## 接口文档：
-
-## 开发文档：
+![登录页](https://img2023.cnblogs.com/blog/3018774/202305/3018774-20230504000518382-1639452899.jpg)
+![就诊页面](https://img2023.cnblogs.com/blog/3018774/202305/3018774-20230504000541208-1868754970.jpg)
+![接诊记录页面](https://img2023.cnblogs.com/blog/3018774/202305/3018774-20230504000654833-482167791.jpg)
+![通讯界面](https://img2023.cnblogs.com/blog/3018774/202305/3018774-20230504000553392-697690837.jpg)
+![知识图谱管理界面](https://img2023.cnblogs.com/blog/3018774/202305/3018774-20230504000605374-362501112.jpg)

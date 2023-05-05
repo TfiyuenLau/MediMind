@@ -1,6 +1,9 @@
 package edu.hbmu.cooperation.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import edu.hbmu.cooperation.domain.entity.CommunicationSession;
 import edu.hbmu.cooperation.domain.entity.MsgInfo;
 import edu.hbmu.cooperation.domain.response.ResultVO;
 import edu.hbmu.cooperation.service.ICommunicationSessionService;
@@ -13,6 +16,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,6 +38,7 @@ public class MsgInfoController {
     private ICommunicationSessionService communicationSessionService;
 
     @ApiOperation("通过会话UID获取该会话的消息列表")
+    @SaCheckLogin
     @GetMapping("/getMsgListByUid/{chatType}/{uid}")
     public ResultVO getMsgListByUid(@PathVariable("chatType") Integer chatType, @PathVariable("uid") Long uid) {
         // 获取对应的消息集合
@@ -47,23 +52,37 @@ public class MsgInfoController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        if (msgInfoList == null || msgInfoList.size() == 0) {
+            return ResultVO.ok(msgInfoList);
+        }
 
-        // 当点击该uid对应的会话时重置会话的unread count
-        communicationSessionService.updateSessionUnread(uid, 0);
+        // 判断当前登录者是否与消息发送者id相同
+        if (StpUtil.getLoginIdAsLong() != msgInfoList.get(msgInfoList.size() - 1).getFromId()) {
+            // 重置会话的unread为0
+            communicationSessionService.updateSessionUnread(uid, 0);
 
+            // 重置所有该会话的消息的isRead字段为1
+            MsgInfo msgInfo = new MsgInfo();
+            msgInfo.setUid(uid);
+            msgInfo.setIsRead(1);
+            msgInfoService.updateMsgIsReadByUid(msgInfo);
+        }
         return ResultVO.ok(msgInfoList);
     }
 
-    @ApiIgnore
-    @ApiOperation("通过会话UID获取消息分页列表")
-    @GetMapping("/getMsgPageByUid/{page}/{uid}")
-    public ResultVO getMsgPageByUid(@PathVariable("page") Long page, @PathVariable("uid") Long uid) {
-        IPage<MsgInfo> msgInfoIPage = msgInfoService.getMsgInfoPage(page, uid);
-        if (msgInfoIPage.getRecords().size() == 0) {
-            return ResultVO.errorMsg("没有相关消息");
+    @ApiOperation("查询当前登录医生的所有未读消息")
+    @SaCheckLogin
+    @GetMapping("/getUnreadMsgInfo")
+    public ResultVO getUnreadMsgInfo() {
+        // 获取所有会话相关并封装为未读消息
+        long doctorId = StpUtil.getLoginIdAsLong();
+        List<CommunicationSession> communicationSessionList = communicationSessionService.getSessionByDoctorId(doctorId);
+        List<MsgInfo> msgInfos = new ArrayList<>();
+        for (CommunicationSession communicationSession : communicationSessionList) {
+            msgInfos.addAll(msgInfoService.getUnreadMsgInfo(communicationSession.getId(), doctorId));
         }
 
-        return ResultVO.ok(msgInfoIPage);
+        return ResultVO.ok(msgInfos);
     }
 
     @ApiOperation("上传图片消息")

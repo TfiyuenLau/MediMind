@@ -27,7 +27,11 @@ public interface IMsgInfoService extends IService<MsgInfo> {
 
     List<MsgInfo> getGroupMsgInfoList(Long uid);
 
+    List<MsgInfo> getUnreadMsgInfo(Long doctorId, Long fromId);
+
     IPage<MsgInfo> getMsgInfoPage(Long page, Long uid);
 
     File uploadingFile(MultipartFile file, String filePath) throws IOException;
+
+    int updateMsgIsReadByUid(MsgInfo msgInfo);
 }

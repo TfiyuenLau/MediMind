@@ -7,10 +7,13 @@ import cn.dev33.satoken.util.SaResult;
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.ShearCaptcha;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import edu.hbmu.outpatient.constants.AuthorityConstants;
 import edu.hbmu.outpatient.domain.entity.Doctor;
 import edu.hbmu.outpatient.domain.request.DoctorParams;
+import edu.hbmu.outpatient.domain.request.PasswordParams;
 import edu.hbmu.outpatient.domain.response.DoctorVO;
 import edu.hbmu.outpatient.domain.response.ResultVO;
+import edu.hbmu.outpatient.service.IDepartmentService;
 import edu.hbmu.outpatient.service.IDoctorService;
 import edu.hbmu.outpatient.util.RedisUtils;
 import io.swagger.annotations.Api;
@@ -42,6 +45,9 @@ public class DoctorController {
     private IDoctorService doctorService;
 
     @Autowired
+    private IDepartmentService departmentService;
+
+    @Autowired
     private RedisUtils redisUtils;
 
     @ApiOperation("医生用户登录方法")
@@ -53,7 +59,6 @@ public class DoctorController {
         if (codeValue == null) {
             return SaResult.error("验证码已过期，请重新输入！");
         }
-        System.err.println(account + ";" + password + ";" + code);
         if (!codeValue.equals(code)) {
             return SaResult.error("验证码错误！");
         }
@@ -77,26 +82,26 @@ public class DoctorController {
     @ApiOperation(value = "生成图像验证码")
     @GetMapping("/generateValidateCode")
     public void generateValidateCode(HttpServletResponse response) throws IOException {
-        //设置response响应
+        // 设置response响应
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Pragma", "No-cache");
         response.setHeader("Cache-Control", "no-cache");
         response.setDateHeader("Expires", 0);
         response.setContentType("image/jpeg");
 
-        //把图形验证码凭证放入cookie中
+        // 把图形验证码凭证放入cookie中
         String tokenId = "CAPTCHA_TOKEN" + UUID.randomUUID().toString();
         Cookie cookie = new Cookie("imgCodeToken", tokenId);
         cookie.setPath("/");
         response.addCookie(cookie);
 
-        //创建扭曲干扰验证码，定义图形验证码的长、宽、验证码字符数、干扰线宽度
+        // 创建扭曲干扰验证码，定义图形验证码的长、宽、验证码字符数、干扰线宽度
         ShearCaptcha captcha = CaptchaUtil.createShearCaptcha(200, 100, 4, 4);
 
-        //把凭证对应的验证码信息保存到redis
+        // 把凭证对应的验证码信息保存到redis
         redisUtils.set(tokenId, captcha.getCode(), 60);
 
-        //输出浏览器
+        // 输出浏览器
         OutputStream stream = response.getOutputStream();
         captcha.write(stream);
         stream.flush();
@@ -120,6 +125,7 @@ public class DoctorController {
 
         DoctorVO doctorVO = new DoctorVO();
         BeanUtils.copyProperties(accountInfo, doctorVO);
+        doctorVO.setBelongTo(departmentService.getDepartmentById(accountInfo.getBelongTo()).getDepartmentName());
 
         return ResultVO.ok(doctorVO);
     }
@@ -137,6 +143,7 @@ public class DoctorController {
 
         DoctorVO doctorVO = new DoctorVO();
         BeanUtils.copyProperties(accountInfo, doctorVO);
+        doctorVO.setBelongTo(departmentService.getDepartmentById(accountInfo.getBelongTo()).getDepartmentName());
 
         return ResultVO.ok(doctorVO);
     }
@@ -149,7 +156,7 @@ public class DoctorController {
     }
 
     @ApiOperation("获取医生列表，仅admin权限")
-    @SaCheckRole("admin")//鉴权操作
+    @SaCheckRole(AuthorityConstants.ADMIN)//鉴权操作
     @GetMapping("/getDoctorByPage/{page}")
     public ResultVO getDoctorByPage(@PathVariable("page") Long page) {
         IPage<Doctor> doctorIPage = doctorService.getDoctorByPage(page);
@@ -168,6 +175,46 @@ public class DoctorController {
         BeanUtils.copyProperties(doctorParams, doctor);
         if (doctorService.insertDoctor(doctor) < 1) {
             return ResultVO.errorMsg("注册失败");
+        }
+
+        return ResultVO.ok();
+    }
+
+    @ApiOperation("修改医生信息，无需修改的信息传null")
+    @PutMapping("/updateDoctorInfo")
+    public ResultVO updateDoctorInfo(@RequestBody Doctor doctor) {
+        try {
+            doctorService.updateDoctorById(doctor);
+        } catch (Exception e) {
+            return ResultVO.errorMsg(new RuntimeException(e).getMessage());
+        }
+
+        return ResultVO.ok(doctor);
+    }
+
+    @ApiOperation("修改医生密码")
+    @PutMapping("/updateDoctorPassword")
+    public ResultVO updateDoctorPassword(@RequestBody PasswordParams passwordParams) {
+        Doctor doctor = doctorService.doRealPassword(passwordParams.getDoctorId(), passwordParams.getOldPassword());
+        if (doctor == null) {
+            return ResultVO.errorMsg("错误的旧密码");
+        }
+        doctor.setPassword(passwordParams.getNewPassword());
+        doctorService.updateDoctorPassword(doctor);
+
+        return ResultVO.ok();
+    }
+
+    @ApiOperation("修改医生权限（admin、doctor）")
+    @PutMapping("/updateDoctorAuthority")
+    public ResultVO updateDoctorAuthority(@RequestParam("doctorId") Long doctorId, @RequestParam("authority") String authority) {
+        Doctor doctor = new Doctor();
+        doctor.setDoctorId(doctorId);
+        doctor.setAuthority(authority);
+        try {
+            doctorService.updateDoctorAuthority(doctor);
+        } catch (Exception e) {
+            return ResultVO.errorMsg(new RuntimeException(e).getMessage());
         }
 
         return ResultVO.ok();

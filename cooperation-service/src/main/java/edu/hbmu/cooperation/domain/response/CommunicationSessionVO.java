@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 @Setter
 @TableName("communication_session")
 @ApiModel(value = "CommunicationSession对象", description = "")
-public class CommunicationSessionVO implements Serializable {
+public class CommunicationSessionVO implements Serializable, Comparable<CommunicationSessionVO> {
 
     private static final long serialVersionUID = 1L;
 
@@ -61,4 +61,15 @@ public class CommunicationSessionVO implements Serializable {
 
     @ApiModelProperty("该会话未读数目")
     private Integer unreadCount;
+
+    /**
+     * 按最后消息发送时间降序排序
+     *
+     * @param o the object to be compared.
+     * @return
+     */
+    @Override
+    public int compareTo(CommunicationSessionVO o) {
+        return o.getLastTime().compareTo(this.getLastTime());
+    }
 }

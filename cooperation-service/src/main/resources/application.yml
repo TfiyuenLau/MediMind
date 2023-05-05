@@ -29,6 +29,9 @@ spring:
     multipart:
       max-file-size: 8MB
       max-request-size: 16MB
+  quartz:
+    jdbc:
+      initialize-schema: never
 
 mybatis-plus:
   global-config:

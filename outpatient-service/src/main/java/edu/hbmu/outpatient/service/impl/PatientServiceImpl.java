@@ -41,6 +41,19 @@ public class PatientServiceImpl extends ServiceImpl<PatientMapper, Patient> impl
         return patientMapper.selectPage(new Page<>(page, 25), null);
     }
 
+    @Override
+    public List<Patient> getPatientList() {
+        return patientMapper.selectList(null);
+    }
+
+    @Override
+    public List<Patient> getPatientByLikeName(String key) {
+        LambdaQueryWrapper<Patient> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(Patient::getPatientName, key).or().like(Patient::getPatientGender, key);// 从姓名和性别中模糊查询
+
+        return patientMapper.selectList(queryWrapper);
+    }
+
     /**
      * 生成随机挂号病人信息
      *
@@ -75,6 +88,16 @@ public class PatientServiceImpl extends ServiceImpl<PatientMapper, Patient> impl
     @Override
     public int insertPatient(Patient patient) {
         return patientMapper.insert(patient);
+    }
+
+    @Override
+    public int updatePatient(Patient patient) {
+        return patientMapper.updateById(patient);
+    }
+
+    @Override
+    public int deletePatient(Long id) {
+        return patientMapper.deleteById(id);
     }
 
 }

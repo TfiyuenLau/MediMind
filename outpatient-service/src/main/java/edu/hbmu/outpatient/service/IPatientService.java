@@ -20,9 +20,17 @@ public interface IPatientService extends IService<Patient> {
 
     IPage<Patient> getPatientByPage(Long page);
 
+    List<Patient> getPatientList();
+
+    List<Patient> getPatientByLikeName(String key);
+
     List<Patient> publishRegisterPatientList();
 
     Patient processPatientQueue(String queueName);
 
     int insertPatient(Patient patient);
+
+    int updatePatient(Patient patient);
+
+    int deletePatient(Long id);
 }

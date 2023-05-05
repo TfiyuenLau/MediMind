@@ -1,5 +1,6 @@
 package edu.hbmu.outpatient;
 
+import edu.hbmu.fegin.client.OutpatientClient;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -15,10 +16,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 @MapperScan("edu.hbmu.outpatient.dao")
+@EnableFeignClients(basePackageClasses = {OutpatientClient.class})
 public class OutpatientServiceApplication {
 
     public static void main(String[] args) {

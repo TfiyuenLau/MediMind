@@ -4,6 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.hbmu.cooperation.domain.entity.CommunicationSession;
 import edu.hbmu.cooperation.domain.entity.GroupMember;
+import edu.hbmu.cooperation.domain.request.GroupMemberParams;
 import edu.hbmu.cooperation.domain.response.GroupMemberVo;
 import edu.hbmu.cooperation.domain.response.ResultVO;
 import edu.hbmu.cooperation.service.ICommunicationSessionService;
@@ -69,15 +70,21 @@ public class GroupMemberController {
         return ResultVO.ok(groupMemberVos);
     }
 
-    @ApiOperation("邀请医生进入该团队")
-    @PostMapping("/inviteGroupMember")
-    public ResultVO inviteGroupMember(Long groupId, Long memberId) {
-        // 添加群成员
+    @ApiOperation("申请进入该团队")
+    @PostMapping("/applyGroupMember")
+    public ResultVO applyGroupMember(Long groupId) {
+        long memberId = StpUtil.getLoginIdAsLong();
+        // 判断是否已在团队中
+        if (groupMemberService.isJoined(groupId, memberId) != null) {
+            return ResultVO.errorMsg("您已经在本团队中了");
+        }
+
+        // 加入团队
         GroupMember groupMember = new GroupMember();
         groupMember.setGroupId(groupId);
         groupMember.setGroupMember(memberId);
         if (groupMemberService.insertGroupMember(groupMember) < 1) {
-            return ResultVO.errorMsg("未邀请成功");
+            return ResultVO.errorMsg("未申请成功");
         }
 
         // 新建相关群会话
@@ -91,17 +98,30 @@ public class GroupMemberController {
         return ResultVO.ok();
     }
 
-    @ApiOperation("申请进入该团队")
-    @PostMapping("/applyGroupMember")
-    public ResultVO applyGroupMember(Long groupId) {
-        long memberId = StpUtil.getLoginIdAsLong();
-        GroupMember groupMember = new GroupMember();
-        groupMember.setGroupId(groupId);
-        groupMember.setGroupMember(memberId);
-
-        if (groupMemberService.insertGroupMember(groupMember) < 1) {
-            return ResultVO.errorMsg("未申请成功");
+    @ApiOperation("邀请医生进入该团队")
+    @PostMapping("/inviteGroupMember")
+    public ResultVO inviteGroupMember(@RequestBody GroupMemberParams groupMemberParams) {
+        // 判断是否已在团队中
+        if (groupMemberService.isJoined(groupMemberParams.getGroupId(), groupMemberParams.getGroupMember()) != null) {
+            return ResultVO.errorMsg("他已经在本团队中了");
         }
+
+        // 添加群成员
+        GroupMember groupMember = new GroupMember();
+        groupMember.setGroupId(groupMemberParams.getGroupId());
+        groupMember.setGroupMember(groupMemberParams.getGroupMember());
+        if (groupMemberService.insertGroupMember(groupMember) < 1) {
+            return ResultVO.errorMsg("未邀请成功");
+        }
+
+        // 新建相关群会话
+        CommunicationSession communicationSession = new CommunicationSession();
+        communicationSession.setChatType(2);
+        communicationSession.setFromId(groupMemberParams.getGroupMember());
+        communicationSession.setToId(groupMemberParams.getGroupId());
+        communicationSession.setLastMsg("暂无消息");
+        communicationSessionService.insertCommunicationSession(communicationSession);
+
         return ResultVO.ok();
     }
 

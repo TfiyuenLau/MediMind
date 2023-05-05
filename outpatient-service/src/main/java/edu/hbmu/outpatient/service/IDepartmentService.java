@@ -17,4 +17,10 @@ public interface IDepartmentService extends IService<Department> {
     Department getDepartmentById(Long id);
 
     IPage<Department> getDepartmentByPage(Long page);
+
+    int insertDepartment(Department department);
+
+    int updateDepartment(Department department);
+
+    int deleteDepartmentById(Long id);
 }

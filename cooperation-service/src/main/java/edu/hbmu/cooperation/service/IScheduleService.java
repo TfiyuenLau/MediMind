@@ -17,5 +17,13 @@ public interface IScheduleService extends IService<Schedule> {
 
     List<Schedule> getScheduleByDoctorId(Long id);
 
+    List<Schedule> getScheduleList();
+
+    List<Schedule> getRemindScheduleByDoctorId(Long doctorId, Integer remindedDay);
+
     int insertSchedule(Schedule schedule);
+
+    int updateScheduleStatus(Schedule schedule);
+
+    int updateSchedule(Schedule schedule);
 }

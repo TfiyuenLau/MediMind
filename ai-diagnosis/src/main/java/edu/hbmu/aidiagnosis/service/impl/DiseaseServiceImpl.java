@@ -21,6 +21,17 @@ public class DiseaseServiceImpl implements IDiseaseService {
     }
 
     @Override
+    public Disease findDiseaseByName(String name) {
+        return diseaseRepository.findDiseaseByName(name);
+    }
+
+    @Override
+    public List<Disease> findDiseaseByNameContaining(String name) {
+
+        return diseaseRepository.findDiseasesByNameContaining(name);
+    }
+
+    @Override
     public List<Disease> findDiseaseBySymptom(String symptom) {
 
         return diseaseRepository.findDiseasesBySymptom(symptom);
@@ -64,10 +75,41 @@ public class DiseaseServiceImpl implements IDiseaseService {
         return diseaseRepository.save(disease);
     }
 
-    @Override
     @Transactional(value = "neo4jTransaction")
-    public void deleteDisease(Disease disease) {
-        diseaseRepository.delete(disease);
+    @Override
+    public void deleteDiseaseById(Long id) {
+        diseaseRepository.deleteById(id);
+    }
+
+    /**
+     * 按照type删除Disease实体节点的一个关系
+     *
+     * @param diseaseId 疾病ID
+     * @param otherId   另一个实体节点的ID
+     * @param type      待删除的关系类型
+     */
+    @Transactional(value = "neo4jTransaction")
+    @Override
+    public void deleteDiseaseRelationship(Long diseaseId, Long otherId, String type) {
+        if (Objects.equals(type, "has_symptom")) {
+            diseaseRepository.deleteSymptomRelation(diseaseId, otherId);
+        } else if (Objects.equals(type, "need_check")) {
+            diseaseRepository.deleteNeedCheckRelationship(diseaseId, otherId);
+        } else if (Objects.equals(type, "acompany_with")) {
+            diseaseRepository.deleteAccompanyRelation(diseaseId, otherId);
+        } else if (Objects.equals(type, "common_drug")) {
+            diseaseRepository.deleteCommonDrugRelation(diseaseId, otherId);
+        } else if (Objects.equals(type, "recommand_drug")) {
+            diseaseRepository.deleteRecommendDrugRelation(diseaseId, otherId);
+        } else if (Objects.equals(type, "recommand_eat")) {
+            diseaseRepository.deleteRecommendEatRelation(diseaseId, otherId);
+        } else if (Objects.equals(type, "do_eat")) {
+            diseaseRepository.deleteDoEatRelations(diseaseId, otherId);
+        } else if (Objects.equals(type, "no_eat")) {
+            diseaseRepository.deleteNoEatRelation(diseaseId, otherId);
+        } else {
+            throw new IllegalArgumentException("type error!" + type + " is not correct type");
+        }
     }
 
 }

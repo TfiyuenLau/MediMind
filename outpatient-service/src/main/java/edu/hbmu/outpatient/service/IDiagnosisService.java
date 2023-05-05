@@ -20,6 +20,8 @@ public interface IDiagnosisService extends IService<Diagnosis> {
 
     IPage<Diagnosis> getDiagnosisByDoctor(Long id, Long page);
 
+    List<Diagnosis> getDiagnosisByPatientId(Long patientId);
+
     IPage<Diagnosis> getDiagnosisByPatientId(Long patientId, Long page);
 
     int insertDiagnosis(Diagnosis diagnosis);

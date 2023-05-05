@@ -25,9 +25,9 @@ public class GroupMemberServiceImpl extends ServiceImpl<GroupMemberMapper, Group
     private GroupMemberMapper groupMemberMapper;
 
     /**
-     * 通过GroupInfoId外键获取团队成员对象
+     * 通过团队信息的GroupId获取团队成员对象
      *
-     * @param id GroupInfoId
+     * @param id GroupId
      * @return
      */
     @Override
@@ -54,6 +54,21 @@ public class GroupMemberServiceImpl extends ServiceImpl<GroupMemberMapper, Group
     @Override
     public int insertGroupMember(GroupMember groupMember) {
         return groupMemberMapper.insert(groupMember);
+    }
+
+    /**
+     * 判断是否已经加入了该团队
+     *
+     * @param groupId
+     * @param memberId
+     * @return
+     */
+    @Override
+    public GroupMember isJoined(Long groupId, Long memberId) {
+        LambdaQueryWrapper<GroupMember> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(GroupMember::getGroupId, groupId).eq(GroupMember::getGroupMember, memberId);
+
+        return groupMemberMapper.selectOne(queryWrapper);
     }
 
 }

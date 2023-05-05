@@ -2,15 +2,14 @@ package edu.hbmu.outpatient.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import edu.hbmu.outpatient.domain.entity.Department;
+import edu.hbmu.outpatient.domain.request.DepartmentParams;
 import edu.hbmu.outpatient.service.IDepartmentService;
 import edu.hbmu.outpatient.domain.response.ResultVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -49,6 +48,44 @@ public class DepartmentController {
         }
 
         return ResultVO.ok(departmentIPage);
+    }
+
+    @ApiOperation("新增科室")
+    @PostMapping("/insertDepartment")
+    public ResultVO insertDepartment(@RequestBody DepartmentParams departmentParams) {
+        Department department = new Department();
+        BeanUtils.copyProperties(departmentParams, department);
+        try {
+            departmentService.insertDepartment(department);
+        } catch (Exception e) {
+            return ResultVO.errorMsg(new RuntimeException(e).getMessage());
+        }
+
+        return ResultVO.ok();
+    }
+
+    @ApiOperation("更新科室信息")
+    @PostMapping("/updateDepartment")
+    public ResultVO updateDepartment(@RequestBody Department department) {
+        try {
+            departmentService.updateDepartment(department);
+        } catch (Exception e) {
+            return ResultVO.errorMsg(new RuntimeException(e).getMessage());
+        }
+
+        return ResultVO.ok();
+    }
+
+    @ApiOperation("按科室id删除科室")
+    @DeleteMapping("/deleteDepartmentById")
+    public ResultVO deleteDepartmentById(@RequestParam("id") Long id) {
+        try {
+            departmentService.deleteDepartmentById(id);
+        } catch (Exception e) {
+            return ResultVO.errorMsg(new RuntimeException(e).getMessage());
+        }
+
+        return ResultVO.ok();
     }
 
 }

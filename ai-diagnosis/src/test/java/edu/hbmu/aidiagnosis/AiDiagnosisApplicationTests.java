@@ -138,4 +138,5 @@ class AiDiagnosisApplicationTests {
         Disease disease = diseaseRepository.findDiseaseById(1L);
         System.out.println(disease);
     }
+
 }

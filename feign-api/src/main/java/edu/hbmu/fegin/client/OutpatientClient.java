@@ -1,6 +1,7 @@
 package edu.hbmu.fegin.client;
 
 import edu.hbmu.fegin.domain.response.ResultVO;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,5 +37,14 @@ public interface OutpatientClient {
      */
     @GetMapping(value = "/department/getDepartmentById/{id}")
     ResultVO getDepartmentById(@PathVariable("id") Long id);
+
+    /**
+     * 按病人ID获取就诊病例视图集合
+     *
+     * @param patientId
+     * @return
+     */
+    @GetMapping("/diagnosis/getDiagnosisByPatientId/{patientId}")
+    ResultVO getDiagnosisByPatientId(@PathVariable("patientId") Long patientId);
 
 }

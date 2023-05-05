@@ -71,12 +71,28 @@ public class DiagnosisController {
         return processDiagnosisPageToVO(page, diagnosisIPage);
     }
 
-    @ApiOperation("通过病人id获取就诊记录列表")
+    @ApiOperation("通过病人id获取分页就诊记录列表")
     @GetMapping("/getDiagnosisByPatientId/{page}/{patientId}")
     public ResultVO getDiagnosisByPatientId(@PathVariable("page") Long page, @PathVariable("patientId") Long patientId) {
         IPage<Diagnosis> diagnosisIPage = diagnosisService.getDiagnosisByPatientId(patientId, page);
 
         return processDiagnosisPageToVO(page, diagnosisIPage);
+    }
+
+    @ApiOperation("通过病人id获取就诊记录列表")
+    @GetMapping("/getDiagnosisByPatientId/{patientId}")
+    public ResultVO getDiagnosisByPatientId(@PathVariable("patientId") Long patientId) {
+        List<Diagnosis> diagnosisList = diagnosisService.getDiagnosisByPatientId(patientId);
+
+        ArrayList<DiagnosisVO> diagnosisVOS = new ArrayList<>();
+        for (Diagnosis diagnosis : diagnosisList) {
+            DiagnosisVO diagnosisVO = new DiagnosisVO();
+            BeanUtils.copyProperties(diagnosis, diagnosisVO);
+            diagnosisVO.setDiagnosisResult(diseaseService.getDiseaseById(diagnosis.getDiagnosisResult()).getDiseaseName());
+            diagnosisVOS.add(diagnosisVO);
+        }
+
+        return ResultVO.ok(diagnosisVOS);
     }
 
     /**

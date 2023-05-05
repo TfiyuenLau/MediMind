@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -73,11 +74,12 @@ public class CommunicationSessionController {
 
             communicationSessionVOS.add(communicationSessionVO);
         }
+        Collections.sort(communicationSessionVOS);
 
         return ResultVO.ok(communicationSessionVOS);
     }
 
-    @ApiOperation("添加一位好友（或团队群聊），这意味着为当前医生新增一条通讯会话")
+    @ApiOperation("添加一位好友，这意味着为当前医生新增一条通讯会话")
     @SaCheckLogin
     @PostMapping("/insertCommunicationSession")
     public ResultVO insertCommunicationSession (@RequestBody CommunicationSessionParams communicationSessionParams) {

@@ -34,7 +34,7 @@ public class SwaggerConfiguration {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("Cooperation Service协作模块接口文档")
-                .description("本文档用于Cooperation团队协作模块API的接口交接...如有疑问请向 tfiyuenlau@foxmail.com 核查")
+                .description("本文档用于MediMind的Cooperation团队协作模块API的接口交接...如有疑问请向 tfiyuenlau@foxmail.com 核查")
                 .version("v23-04-19")
                 .build();
     }

@@ -1,8 +1,5 @@
 package edu.hbmu.cooperation.domain.request;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -10,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -27,6 +23,9 @@ import java.time.LocalDateTime;
 public class GroupInfoParams implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    @ApiModelProperty("自增长主键")
+    private Long id;
 
     @ApiModelProperty("团队名称")
     private String groupName;

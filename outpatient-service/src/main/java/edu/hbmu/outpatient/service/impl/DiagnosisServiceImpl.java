@@ -45,6 +45,14 @@ public class DiagnosisServiceImpl extends ServiceImpl<DiagnosisMapper, Diagnosis
     }
 
     @Override
+    public List<Diagnosis> getDiagnosisByPatientId(Long patientId) {
+        LambdaQueryWrapper<Diagnosis> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Diagnosis::getPatientId, patientId);
+
+        return diagnosisMapper.selectList(queryWrapper);
+    }
+
+    @Override
     public IPage<Diagnosis> getDiagnosisByPatientId(Long patientId, Long page) {
         LambdaQueryWrapper<Diagnosis> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Diagnosis::getPatientId, patientId);

@@ -39,8 +39,8 @@ public class SwaggerConfiguration {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("MediMind门诊模块接口文档")
-                .description("本文档用于outpatient门诊模块API的接口交接...如有疑问请向 tfiyuenlau@foxmail.com 核查")
+                .title("Outpatient Service门诊模块接口文档")
+                .description("本文档用于MediMind的outpatient门诊模块API的接口交接...如有疑问请向 tfiyuenlau@foxmail.com 核查")
                 .version("v23-04-10")
                 .build();
     }

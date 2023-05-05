@@ -1,8 +1,5 @@
-package edu.hbmu.outpatient.domain.response;
+package edu.hbmu.fegin.domain.response;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -27,7 +24,6 @@ public class DiagnosisVO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("诊断记录主键")
-    @TableId(value = "diagnosis_id", type = IdType.AUTO)
     private Long diagnosisId;
 
     @ApiModelProperty("病人id")

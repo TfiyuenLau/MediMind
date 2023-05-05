@@ -1,5 +1,6 @@
 package edu.hbmu.aidiagnosis.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
 import edu.hbmu.aidiagnosis.domain.node.Disease;
 import edu.hbmu.aidiagnosis.domain.request.DiseaseParams;
 import edu.hbmu.aidiagnosis.domain.response.ResultVO;
@@ -9,11 +10,13 @@ import edu.hbmu.aidiagnosis.util.QuestionClassifier;
 import edu.hbmu.aidiagnosis.util.QuestionParser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,19 +66,39 @@ public class DiseaseController {
         return ResultVO.ok(disease);
     }
 
+    @ApiOperation("通过疾病名称精确查询疾病封装对象")
+    @GetMapping("/getDiseaseByName/{name}")
+    public ResultVO getDiseaseByName(@PathVariable("name") String name) {
+        Disease disease = diseaseService.findDiseaseByName(name);
+
+        return ResultVO.ok(disease);
+    }
+
+    @ApiOperation("通过疾病名称模糊查询疾病封装对象")
+    @GetMapping("/findDiseaseByNameContaining/{name}")
+    public ResultVO findDiseaseByNameContaining(@PathVariable("name") String name) {
+        List<Disease> diseaseList = diseaseService.findDiseaseByNameContaining(name);
+
+        return ResultVO.ok(diseaseList);
+    }
+
     @ApiOperation("通过病症集合获取最有可能疾病列表(maxCount=5)")
     @PostMapping("/getDiseaseBySymptoms")
     public ResultVO getDiseaseBySymptoms(@RequestBody Set<String> symptomSet) {
-        List<Map.Entry<Disease, Integer>> diseaseEntryList = diseaseService.findDiseaseBySymptoms(symptomSet)
-                .stream().limit(5).collect(Collectors.toList());
+        List<Map.Entry<Disease, Integer>> diseaseEntryList = diseaseService.findDiseaseBySymptoms(symptomSet);
         if (diseaseEntryList.size() == 0) {
             return ResultVO.errorMsg("没有找到改症状对应的疾病");
         }
 
-        return ResultVO.ok(diseaseEntryList);
+        ArrayList<Disease> diseases = new ArrayList<>();
+        for (Map.Entry<Disease, Integer> entry : diseaseEntryList) {
+            diseases.add(entry.getKey());
+        }
+        return ResultVO.ok(diseases.stream().limit(5).collect(Collectors.toList()));
     }
 
     @ApiOperation("插入一个不带关系的节点（请遵循以下规则：新增id为null、修改时带id参数）")
+    @SaCheckRole("admin")
     @PostMapping("/insertDisease")
     public ResultVO insertDisease(@RequestBody DiseaseParams diseaseParams) {
         Disease disease = new Disease();
@@ -84,13 +107,13 @@ public class DiseaseController {
         return ResultVO.ok(diseaseService.saveDisease(disease));
     }
 
-    @ApiOperation("插入或更新一个Disease节点")
+    @ApiOperation("更新一个Disease节点信息，当属性不为null时更新属性，当关系集合不为null时添加该关系")
+    @SaCheckRole("admin")
     @PostMapping("/saveDisease")
     public ResultVO saveDisease(@RequestBody Disease newDisease) {
         Disease disease = new Disease();
         try {
             Disease oldDisease = diseaseService.findDiseaseById(newDisease.getId());
-            System.err.println(oldDisease == null);
             if (oldDisease != null) {// 更新操作
                 BeanUtils.copyProperties(oldDisease, disease);
                 // 更新节点信息
@@ -119,7 +142,7 @@ public class DiseaseController {
                     disease.setEasyGet(newDisease.getEasyGet());
                 }
 
-                // 更新关系节点
+                // 添加关系节点
                 if (newDisease.getAccompanyDiseaseSet() != null) {
                     disease.getAccompanyDiseaseSet().addAll(newDisease.getAccompanyDiseaseSet());
                 }
@@ -155,14 +178,28 @@ public class DiseaseController {
         }
     }
 
-    @ApiOperation("根据id删除疾病节点（仅需传id字段，其他为空：\"\"）")
-    @DeleteMapping("/deleteDisease")
-    public ResultVO deleteDisease(@RequestBody DiseaseParams diseaseParams) {
+    @ApiOperation("根据id删除疾病节点")
+    @SaCheckRole("admin")
+    @DeleteMapping("/deleteDiseaseById")
+    public ResultVO deleteDiseaseById(@RequestParam("id") Long id) {
         try {
-            Disease disease = new Disease();
-            BeanUtils.copyProperties(diseaseParams, disease);
-            diseaseService.deleteDisease(disease);
+            diseaseService.deleteDiseaseById(id);
         } catch (BeansException e) {
+            return ResultVO.errorMsg(new RuntimeException(e).getMessage());
+        }
+
+        return ResultVO.ok();
+    }
+
+    @ApiOperation("按照type删除Disease实体节点的一个关系")
+    @SaCheckRole("admin")
+    @DeleteMapping("/deleteDiseaseRelationship")
+    public ResultVO deleteDiseaseRelationship(@ApiParam("出节点的疾病ID，如：8808") @RequestParam("diseaseId") Long diseaseId,
+                                              @ApiParam("入节点的实体节点ID，如：38118") @RequestParam("otherId") Long otherId,
+                                              @ApiParam("待删除的关系类型，如：has_symptom") @RequestParam("type") String type) {
+        try {
+            diseaseService.deleteDiseaseRelationship(diseaseId, otherId, type);
+        } catch (Exception e) {
             return ResultVO.errorMsg(new RuntimeException(e).getMessage());
         }
 

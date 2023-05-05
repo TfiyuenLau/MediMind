@@ -23,7 +23,7 @@ public interface ICommunicationSessionService extends IService<CommunicationSess
 
     Long getGroupSessionIdByFromAndToId(Long fromId, Long toId);
 
-    List<CommunicationSession> getSessionByGroupId(Long groupId);
+    List<CommunicationSession> getSessionsByGroupId(Long groupId);
 
     int insertCommunicationSession(CommunicationSession communicationSession);
 

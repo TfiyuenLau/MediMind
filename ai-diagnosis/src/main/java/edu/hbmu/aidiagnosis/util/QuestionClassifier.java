@@ -163,7 +163,7 @@ public class QuestionClassifier {
             cureQuestionWds = Arrays.asList("治疗什么", "治啥", "治疗啥", "医治啥", "治愈啥", "主治啥", "主治什么", "有什么用", "有何用",
                     "用处", "用途", "有什么好处", "有什么益处", "有何益处", "用来", "用来做啥", "用来作甚", "需要", "要");
 
-            System.err.println("Model init finished...");
+            System.out.println("Model init finished...");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -248,13 +248,13 @@ public class QuestionClassifier {
         }
 
         // 疾病对应的检查
-        if (checkWords(checkWds, question) && types.contains("disease")) {
+        if (checkWords(checkQuestionWds, question) && types.contains("disease")) {
             questionType = "disease_check";
             questionTypes.add(questionType);
         }
 
         // 已知检查项目查疾病
-        if (checkWords(checkWds, question) && types.contains("check")) {
+        if (checkWords(checkQuestionWds, question) && types.contains("check")) {
             questionType = "check_disease";
             questionTypes.add(questionType);
         }

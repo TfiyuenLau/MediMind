@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -38,15 +39,15 @@ public class DiseaseController {
         return ResultVO.ok(disease);
     }
 
-    @ApiOperation("通过疾病名称查找所有符合条件的Disease对象集合")
+    @ApiOperation("通过疾病名称模糊查询Disease对象集合")
     @GetMapping("/findDiseasesByName/{diseaseName}")
     public ResultVO findDiseasesByName(@PathVariable("diseaseName") String diseaseName) {
         List<Disease> diseaseList = diseaseService.findDiseasesByName(diseaseName);
-        if (diseaseList == null) {
+        if (diseaseList == null || diseaseList.size() == 0) {
             return ResultVO.errorMsg("未找到名称为" + diseaseName + "对应的疾病");
         }
 
-        return ResultVO.ok();
+        return ResultVO.ok(diseaseList.stream().limit(8).collect(Collectors.toList()));
     }
 
     @ApiOperation("通过前缀获取疾病自动补全建议(maxSize=10)")

@@ -1,6 +1,8 @@
 package edu.hbmu.outpatient.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import edu.hbmu.outpatient.domain.entity.Doctor;
@@ -65,4 +67,41 @@ public class DoctorServiceImpl extends ServiceImpl<DoctorMapper, Doctor> impleme
         return doctorMapper.insert(doctor);
     }
 
+    @Override
+    public int updateDoctorById(Doctor doctor) {
+
+        return doctorMapper.updateById(doctor);
+    }
+
+    /**
+     * 判断该旧密码是否正确
+     *
+     * @param doctorId
+     * @param password
+     * @return
+     */
+    @Override
+    public Doctor doRealPassword(Long doctorId, String password) {
+        LambdaQueryWrapper<Doctor> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Doctor::getDoctorId, doctorId).eq(Doctor::getPassword, password);
+
+        return doctorMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public int updateDoctorPassword(Doctor doctor) {
+        LambdaUpdateWrapper<Doctor> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(Doctor::getDoctorId, doctor.getDoctorId())
+                .set(Doctor::getPassword, doctor.getPassword());
+
+        return doctorMapper.update(doctor, updateWrapper);
+    }
+
+    @Override
+    public int updateDoctorAuthority(Doctor doctor) {
+        LambdaUpdateWrapper<Doctor> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(Doctor::getDoctorId, doctor.getDoctorId()).set(Doctor::getAuthority, doctor.getAuthority());
+
+        return doctorMapper.update(doctor, updateWrapper);
+    }
 }

@@ -41,4 +41,18 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
         return departmentMapper.selectPage(departmentPage, null);
     }
 
+    @Override
+    public int insertDepartment(Department department) {
+        return departmentMapper.insert(department);
+    }
+
+    @Override
+    public int updateDepartment(Department department) {
+        return departmentMapper.updateById(department);
+    }
+
+    @Override
+    public int deleteDepartmentById(Long id) {
+        return departmentMapper.deleteById(id);
+    }
 }

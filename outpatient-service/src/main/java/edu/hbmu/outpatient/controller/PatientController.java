@@ -1,13 +1,25 @@
 package edu.hbmu.outpatient.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.hbmu.fegin.client.OutpatientClient;
 import edu.hbmu.outpatient.constants.MqConstants;
 import edu.hbmu.outpatient.domain.entity.Patient;
+import edu.hbmu.outpatient.domain.response.DiagnosisVO;
+import edu.hbmu.outpatient.domain.response.PatientVO;
 import edu.hbmu.outpatient.domain.response.ResultVO;
+import edu.hbmu.outpatient.service.IDiagnosisService;
 import edu.hbmu.outpatient.service.IPatientService;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -23,6 +35,12 @@ public class PatientController {
 
     @Autowired
     private IPatientService patientService;
+
+    @Autowired
+    private OutpatientClient outpatientClient;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private Patient curPatient;// 当前挂号的病人
 
@@ -46,7 +64,43 @@ public class PatientController {
             return ResultVO.errorMsg("失败！超出最大页码：" + maxPage);
         }
 
-        return ResultVO.ok();
+        return ResultVO.ok(patientIPage);
+    }
+
+    @ApiOperation("获取部分病人信息列表")
+    @GetMapping("/getPatientList")
+    public ResultVO getPatientList() {
+        // 获取数据库前15条Patient数据
+        List<Patient> patientList = patientService.getPatientList().stream().limit(15).collect(Collectors.toList());
+
+        // 封装病人视图对象集合
+        ArrayList<PatientVO> patientVOS = new ArrayList<>();
+        for (Patient patient : patientList) {
+            PatientVO patientVO = new PatientVO();
+            BeanUtils.copyProperties(patient, patientVO);
+            patientVO.setDiagnosisList(objectMapper.convertValue(outpatientClient.getDiagnosisByPatientId(patientVO.getPatientId()).getData(), new TypeReference<List<DiagnosisVO>>() {
+            }));
+            patientVOS.add(patientVO);
+        }
+
+        return ResultVO.ok(patientVOS);
+    }
+
+    @ApiOperation("模糊查询病人姓名性别获取病人信息列表")
+    @GetMapping("/getPatientByLikeName/{key}")
+    public ResultVO getPatientByLikeName(@PathVariable("key") String key) {
+        List<Patient> patientList = patientService.getPatientByLikeName(key);
+
+        ArrayList<PatientVO> patientVOS = new ArrayList<>();
+        for (Patient patient : patientList) {
+            PatientVO patientVO = new PatientVO();
+            BeanUtils.copyProperties(patient, patientVO);
+            patientVO.setDiagnosisList(objectMapper.convertValue(outpatientClient.getDiagnosisByPatientId(patientVO.getPatientId()).getData(), new TypeReference<List<DiagnosisVO>>() {
+            }));
+            patientVOS.add(patientVO);
+        }
+
+        return ResultVO.ok(patientVOS);
     }
 
     @ApiOperation("向队列随机添加挂号数据以模拟病人挂号")
@@ -81,7 +135,36 @@ public class PatientController {
     @ApiOperation("新增病人信息")
     @PostMapping("/insertPatient")
     public ResultVO insertPatient(@RequestBody Patient patient) {
-        patientService.insertPatient(patient);
+        try {
+            patientService.insertPatient(patient);
+        } catch (Exception e) {
+            return ResultVO.errorMsg(new RuntimeException(e).getMessage());
+        }
+
+        return ResultVO.ok();
+    }
+
+    @ApiOperation("更新指定patientId的患者信息")
+    @PutMapping("/updatePatient")
+    public ResultVO updatePatient(@RequestBody Patient patient) {
+        try {
+            patientService.updatePatient(patient);
+        } catch (Exception e) {
+            return ResultVO.errorMsg(new RuntimeException(e).getMessage());
+        }
+
+        return ResultVO.ok();
+    }
+
+    @ApiOperation("根据id删除患者信息")
+    @SaCheckRole("admin")
+    @PutMapping("/deletePatientById")
+    public ResultVO deletePatientById(@RequestParam("id") Long id) {
+        try {
+            patientService.deletePatient(id);
+        } catch (Exception e) {
+            return ResultVO.errorMsg(new RuntimeException(e).getMessage());
+        }
 
         return ResultVO.ok();
     }

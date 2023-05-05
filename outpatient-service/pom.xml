@@ -130,6 +130,13 @@
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
 
+        <!-- fegin api -->
+        <dependency>
+            <groupId>edu.hbmu.feign</groupId>
+            <artifactId>fegin</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
 
     <build>

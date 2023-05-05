@@ -97,7 +97,10 @@ public class AnswerSearcher {
         } else if (Objects.equals(questionType, "disease_cureway")) {
             List<String> desc = new ArrayList<>();
             for (Map<String, Object> answer : answers) {
-                desc.add((String) answer.get("m.cure_way"));
+                // 该查询将获取一个String[]数组，需将其封装成String
+                String[] cureWays = (String[]) answer.get("m.cure_way");
+                String cureWay = String.join("、", cureWays);
+                desc.add(cureWay);
             }
             String subject = (String) answers.get(0).get("m.name");
             finalAnswer.add(String.format("%s可以尝试如下治疗：%s", subject, desc.stream().limit(20).collect(Collectors.joining("；"))));

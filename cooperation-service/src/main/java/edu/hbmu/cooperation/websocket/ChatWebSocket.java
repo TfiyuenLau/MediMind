@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
@@ -39,7 +40,7 @@ public class ChatWebSocket {
     private static final CopyOnWriteArrayList<ChatWebSocket> chatWebSockets = new CopyOnWriteArrayList<>();
 
     //用来记录doctor_id和该session进行绑定
-    private static final Map<Long, Session> sessionMap = new HashMap<>();
+    private static final Map<Long, Session> sessionMap = new ConcurrentHashMap<>();// 使用“ConcurrentHashMap”替换HashMap，结局并发修改异常
 
     // 实例化一个session会话
     private Session session;
@@ -102,7 +103,7 @@ public class ChatWebSocket {
         chatWebSockets.add(this);
 
         // 将登录者id与session映射
-        Object loginIdByToken = StpUtil.getLoginIdByToken(satoken = satoken.split("=")[1]);
+        Object loginIdByToken = StpUtil.getLoginIdByToken(satoken);
         if (loginIdByToken == null) {
             throw new SaTokenException("连接失败，无效Token：" + satoken);
         }
@@ -120,7 +121,7 @@ public class ChatWebSocket {
 
         // 移出map集合
         try {
-            Object loginIdByToken = StpUtil.getLoginIdByToken(satoken = satoken.split("=")[1]);
+            Object loginIdByToken = StpUtil.getLoginIdByToken(satoken);
             for (Long key : sessionMap.keySet()) {
                 if (key.equals(Long.parseLong((String) loginIdByToken))) {
                     sessionMap.remove(key, sessionMap.get(key));
@@ -158,10 +159,11 @@ public class ChatWebSocket {
             }
 
             // 根据聊天类型确认推送目标：会话类型——(群组消息/个人聊天/系统消息:2/1/0)
-            Session fromSession = sessionMap.get(msgInfo.getFromId());
-            fromSession.getAsyncRemote().sendObject(msgInfo);// 发送给发送者
             Integer chatType = msgInfo.getChatType();
             if (chatType == 1) {// 私信聊天
+                Session fromSession = sessionMap.get(msgInfo.getFromId());
+                fromSession.getAsyncRemote().sendObject(msgInfo);// 发送给发送者
+
                 Session toSession = sessionMap.get(msgInfo.getToId());
                 if (toSession != null) {// 用户在线
                     // 发送给接收者
@@ -169,15 +171,18 @@ public class ChatWebSocket {
                 } else {// 用户不在线，更新未读消息
                     communicationSessionService.updateSessionUnread(msgInfo.getUid(),
                             communicationSessionService.getCommunicationById(msgInfo.getUid()).getUnreadCount() + 1);
+                    msgInfo.setIsRead(0);
                 }
             } else if (chatType == 2) {// 群聊
                 // 获取所有在群里的成员
-                List<GroupMember> groupMembers = groupMemberService.getGroupMembersByGroupInfoId(msgInfo.getFromId());
+                List<GroupMember> groupMembers = groupMemberService.getGroupMembersByGroupInfoId(msgInfo.getToId());
                 for (GroupMember groupMember : groupMembers) {
                     Session toSession = sessionMap.get(groupMember.getGroupMember());
+                    System.err.println("groupMember:" + groupMember.getGroupMember());
                     if (toSession != null) {
                         toSession.getAsyncRemote().sendObject(msgInfo);
                     } else {
+                        // TODO：更新团队群聊未读消息
                         continue;
                     }
                 }

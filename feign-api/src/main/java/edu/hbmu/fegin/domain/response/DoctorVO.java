@@ -39,7 +39,7 @@ public class DoctorVO implements Serializable {
     private String professionalTitle;
 
     @ApiModelProperty("外键映射至department_id（科室）")
-    private Long belongTo;
+    private String belongTo;
 
     @ApiModelProperty("医生用户账号")
     private String account;

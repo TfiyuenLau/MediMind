@@ -59,7 +59,7 @@ public class DiseaseServiceImpl extends ServiceImpl<DiseaseMapper, Disease> impl
     @Override
     public List<Disease> findDiseasesByName(String name) {
         LambdaQueryWrapper<Disease> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.like(Disease::getDiseaseName, queryWrapper);
+        queryWrapper.like(Disease::getDiseaseName, name);
         return diseaseMapper.selectList(queryWrapper);
     }
 

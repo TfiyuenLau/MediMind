@@ -1,12 +1,15 @@
 package edu.hbmu.aidiagnosis.domain.node;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Property;
+import lombok.Getter;
+import lombok.Setter;
+import org.neo4j.ogm.annotation.*;
 
-@Data
+import java.util.Set;
+
+@Setter
+@Getter
 @NodeEntity(label = "Symptom")
 public class Symptom {
 
@@ -16,5 +19,10 @@ public class Symptom {
 
     @Property(name = "name")
     private String name;
+
+    // 有该症状的相关疾病
+    @JsonIgnore
+    @Relationship(value = "has_symptom", direction = Relationship.INCOMING)
+    private Set<Disease> diseaseSet;
 
 }

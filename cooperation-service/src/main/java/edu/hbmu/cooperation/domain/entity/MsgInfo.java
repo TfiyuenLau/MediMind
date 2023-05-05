@@ -36,9 +36,6 @@ public class MsgInfo implements Serializable {
     @ApiModelProperty("所属会话uid")
     private Long uid;
 
-    @ApiModelProperty("是否是自己发送的")
-    private Integer isMe;
-
     @ApiModelProperty("发送者uid(可以是自己)")
     private Long fromId;
 
@@ -60,6 +57,9 @@ public class MsgInfo implements Serializable {
     @ApiModelProperty("消息发送时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime sendTime;
+
+    @ApiModelProperty("该消息是否已读")
+    private Integer isRead;
 
     @ApiModelProperty("是否有效")
     @TableLogic

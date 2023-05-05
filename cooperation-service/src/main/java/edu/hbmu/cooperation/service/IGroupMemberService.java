@@ -20,4 +20,6 @@ public interface IGroupMemberService extends IService<GroupMember> {
     List<GroupMember> getGroupMembersByMemberId(Long memberId);
 
     int insertGroupMember(GroupMember groupMember);
+
+    GroupMember isJoined(Long groupId, Long memberId);
 }

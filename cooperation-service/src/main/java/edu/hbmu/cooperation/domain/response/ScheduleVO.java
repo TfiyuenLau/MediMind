@@ -52,4 +52,7 @@ public class ScheduleVO implements Serializable {
 
     @ApiModelProperty("结束时间")
     private LocalDateTime endTime;
+
+    @ApiModelProperty("任务状态(0:未完成, 1:已完成)")
+    private Byte status;
 }

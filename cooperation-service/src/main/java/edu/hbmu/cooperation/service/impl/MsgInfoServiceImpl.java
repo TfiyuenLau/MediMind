@@ -1,6 +1,7 @@
 package edu.hbmu.cooperation.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import edu.hbmu.cooperation.domain.entity.CommunicationSession;
@@ -25,7 +26,7 @@ import java.util.UUID;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author @TfiyuenLau
@@ -69,7 +70,7 @@ public class MsgInfoServiceImpl extends ServiceImpl<MsgInfoMapper, MsgInfo> impl
     public List<MsgInfo> getGroupMsgInfoList(Long uid) {
         // 通过uid获取toId（即groupId），随后获取与groupId有关的所有会话
         Long groupId = communicationSessionService.getCommunicationById(uid).getToId();
-        List<CommunicationSession> communicationSessionList = communicationSessionService.getSessionByGroupId(groupId);
+        List<CommunicationSession> communicationSessionList = communicationSessionService.getSessionsByGroupId(groupId);
         // 封装与群有关的会话Id
         ArrayList<Long> sessionIds = new ArrayList<>();
         for (CommunicationSession communicationSession : communicationSessionList) {
@@ -78,6 +79,23 @@ public class MsgInfoServiceImpl extends ServiceImpl<MsgInfoMapper, MsgInfo> impl
 
         LambdaQueryWrapper<MsgInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(MsgInfo::getChatType, 2).in(MsgInfo::getUid, sessionIds);// 查找所有与会话id集合有关的MsgInfo
+
+        return msgInfoMapper.selectList(queryWrapper);
+    }
+
+    /**
+     * 通过会话id与登陆者id查询所有未读消息
+     *
+     * @param uid    会话id
+     * @param fromId 发送者的ID
+     * @return
+     */
+    @Override
+    public List<MsgInfo> getUnreadMsgInfo(Long uid, Long fromId) {
+        LambdaQueryWrapper<MsgInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MsgInfo::getUid, uid)// 会话id
+                .ne(MsgInfo::getFromId, fromId)// 只查询与发送者id不同的数据
+                .eq(MsgInfo::getIsRead, 0);// 查询未读消息
 
         return msgInfoMapper.selectList(queryWrapper);
     }
@@ -137,11 +155,26 @@ public class MsgInfoServiceImpl extends ServiceImpl<MsgInfoMapper, MsgInfo> impl
         // 复制target文件到/static/#/(仅idea测试时使用)
         try {
             Files.copy(new File(uploadFile.getAbsolutePath()).toPath(),
-                    new File(System.getProperty("user.dir") + "\\cooperation-service\\src\\main\\resources\\static\\" + filePath +"\\" + uploadFile.getName()).toPath(), StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+                    new File(System.getProperty("user.dir") + "\\cooperation-service\\src\\main\\resources\\static\\" + filePath + "\\" + uploadFile.getName()).toPath(), StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return uploadFile;
     }
+
+    /**
+     * 更新该一个会话下的所有isRead状态
+     *
+     * @param msgInfo
+     * @return
+     */
+    @Override
+    public int updateMsgIsReadByUid(MsgInfo msgInfo) {
+        LambdaUpdateWrapper<MsgInfo> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(MsgInfo::getUid, msgInfo.getUid()).set(MsgInfo::getIsRead, msgInfo.getIsRead());
+
+        return msgInfoMapper.update(msgInfo, updateWrapper);
+    }
+
 }
